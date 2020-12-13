@@ -30,7 +30,50 @@ typedef struct staff {
 	}class;
 }Staff;
 
-//-------------------------------------------------Staff--------------------------------------------------
+typedef struct sell{
+	char item[SIZE];
+	int count;
+}Sell;
+//-----------------------------------------메뉴 출력-----------------------------------------------
+void print_main(){
+	printf("\n1. 음료 판매\n");
+	printf("2. 고객 관리\n");
+	printf("3. 창고 관리\n");
+	printf("4. 직원 관리\n");
+	printf("5. 마감 처리\n");
+}
+
+void print_menu (){
+	printf("\n\n-----------Welcome-----------\n");
+	printf("1. 아메리카노\t\t2500원\n");
+	printf("2. 카페라떼\t\t3000원\n");
+	printf("3. 바닐라 라떼\t\t3500원\n");
+	printf("4. 카푸치노\t\t3500원\n");
+	printf("5. 카라멜 마끼야또\t4000원\n");
+	printf("6. 카페모카\t\t4000원\n");
+	printf("7. 오늘의 추천 음료!\n");
+	printf("0. 나가시려면 0을 눌러주세요\n");
+	printf("-----------------------------\n");
+	printf("\nSelect : ");
+}
+
+void print_membership(){
+	printf("---------\n");
+	printf("1. 적립\n");
+	printf("2. 신규\n");
+	printf("---------\n");
+	printf("옵션을 선택해 주세요 : ");
+}
+
+void print_staff_menu(){
+	printf("----------\n");
+	printf("1. 신규\n");
+	printf("2. 퇴사\n");
+	printf("3. 출력\n");
+	printf("----------\n");
+	printf("옵션을 선택해 주세요 : ");
+}
+//--------------------------------------------Staff------------------------------------------------
 Staff get_srecord(){
 	Staff data;
 	printf("형식을 선택하세요--> 1. 정직원 2. 알바\n");
@@ -127,48 +170,34 @@ void print_staff(FILE *fsp){
 	}
 }
 
-//---------------------------------------------------------------------------------------------------------------------------
-//----------------------------------------------메뉴 출력--------------------------------------------------------------------
-void print_main(){
-	printf("\n1. 음료 판매\n");
-	printf("2. 고객 관리\n");
-	printf("3. 창고 관리\n");
-	printf("4. 직원 관리\n");
-	printf("5. 마감 처리\n");
+void main_staff(){
+	FILE *fsp;	//staff.txt
+	int staff_option;
+	print_staff_menu();
+	if ((fsp = fopen("staff.txt", "a+t")) == NULL){
+		fprintf(stderr, "입력을 위한 파일을 열 수 없습니다.");
+		exit(1);
+	}
+	scanf("%d", &staff_option);
+	getchar();
+	switch (staff_option){
+		case 1:
+			add_srecord(fsp);	
+			fclose(fsp);
+			break;
+		case 2:
+			cut_staff(fsp);
+			break;
+		case 3:
+			print_staff(fsp);
+			fclose(fsp);
+			break;
+		default:
+			break;
+	}
+	printf("\n");
 }
-
-void print_menu (){
-	printf("\n\n-----------Welcome-----------\n");
-	printf("1. 아메리카노\t\t2500원\n");
-	printf("2. 카페라떼\t\t3000원\n");
-	printf("3. 바닐라 라떼\t\t3500원\n");
-	printf("4. 카푸치노\t\t3500원\n");
-	printf("5. 카라멜 마끼야또\t4000원\n");
-	printf("6. 카페모카\t\t4000원\n");
-	printf("7. 오늘의 추천 음료!\n");
-	printf("0. 나가시려면 0을 눌러주세요\n");
-	printf("-----------------------------\n");
-	printf("\nSelect : ");
-}
-
-void print_membership(){
-	printf("---------\n");
-	printf("1. 적립\n");
-	printf("2. 신규\n");
-	printf("---------\n");
-	printf("옵션을 선택해 주세요 : ");
-}
-
-void print_staff_menu(){
-	printf("----------\n");
-	printf("1. 신규\n");
-	printf("2. 퇴사\n");
-	printf("3. 출력\n");
-	printf("----------\n");
-	printf("옵션을 선택해 주세요 : ");
-}
-//-----------------------------------------------------------------------------------------------------------------------------
-//------------------------------------------- 물건 판매-----------------------------------------------
+//-------------------------------------------판매 관리-----------------------------------------------
 int update_total (int *p, int *t, int price){
 	*p += price;
 	*t += price;
@@ -185,12 +214,40 @@ void sell_inven(Inven *invenp, int idx, int cnt, int(*func)(Inven *, int, int)){
 		printf("\n<<%s>> 자동 주문 완료\n\n", invenp[idx].item);
 	}
 }
+
+int idx(Sell *sellp, char *menu){
+	int i;
+	for (i = 0;i < 6;i++){
+		if(strcmp(sellp[i].item, menu)==0)
+			break;
+	}
+	return i;
+}
+
+void check_sell(Sell *sellp, char *menu, int(*func)(Sell *sellp, char *)){
+	int idx;
+	idx = func(sellp, menu);
+	if (0> idx|| idx>5)
+		printf("\n없는 메뉴입니다.\n");
+	else
+		printf("%d check\n", idx);
+		sellp[idx].count += 1;
+}
 //------------------------------------------
-void main_open(int *todayp, Inven *invenp){
+void init_sell(Sell *sellp){
+	char *menu_name[] = {"아메리카노", "카페라떼", "바닐라라떼", "카라멜마끼아또", "카푸치노", "카페모카"};
+	for (int i = 0;i < 6;i++){
+		strcpy(sellp[i].item, menu_name[i]);
+		sellp[i].count = 0;
+	}
+}
+
+void main_open(int *todayp, Inven *invenp, Sell *sellp){
 	int order = 0;
 	int flag = 0;
 	int total = 0;
 	int index;
+	init_sell(sellp);
 	srand(time(NULL));
 	int random;
 	while (1){
@@ -200,32 +257,38 @@ void main_open(int *todayp, Inven *invenp){
 		getchar();
 		switch (order){
 			case 1 :
+				check_sell(sellp, "아메리카노", idx);
 				update_total(todayp, &total, 2500);
 				sell_inven(invenp, 0, 1, check);
 				break;
 			case 2 :
+				check_sell(sellp, "카페라떼", idx);
 				update_total(todayp, &total, 3000);
 				sell_inven(invenp, 0, 1, check);
 				sell_inven(invenp, 2, 2, check);
 				break;
 			case 3:
+				check_sell(sellp, "바닐라라떼", idx);
 				update_total(todayp, &total, 3500);
 				sell_inven(invenp, 0, 1, check);
 				sell_inven(invenp, 2, 1, check);
 				sell_inven(invenp, 3, 1, check);
 				break;
 			case 4:
+				check_sell(sellp, "카라멜마끼아또", idx);
 				update_total(todayp, &total, 3500);
 				sell_inven(invenp, 0, 1, check);
 				sell_inven(invenp, 2, 1, check);
 				sell_inven(invenp, 4, 1, check);
 				break;
 			case 5:
+				check_sell(sellp, "카푸치노", idx);
 				update_total(todayp, &total, 4000);
 				sell_inven(invenp, 0, 1, check);
 				sell_inven(invenp, 2, 2, check);
 				break;
 			case 6:
+				check_sell(sellp, "카페모카", idx);
 				update_total(todayp, &total, 4000);
 				sell_inven(invenp, 0, 1, check);
 				sell_inven(invenp, 1, 1, check);
@@ -245,8 +308,7 @@ void main_open(int *todayp, Inven *invenp){
 	//customer 파일 열고
 	//메뉴 출력
 }
-//--------------------------------------------------------------------------------
-//-------------------------------------membership--------------------------------------
+//-----------------------------------------membership-------------------------------------------
 Custom get_crecord(){
 	Custom data;
 	printf("이름 : ");
@@ -328,7 +390,6 @@ void main_membership(){
 			break;
 	}
 }
-//-------------------------------------------------------------------------------------------
 //------------------------------------------inventory-----------------------------------------
 void get_inven(Inven *data){
 	FILE *fip = fopen("inventory.txt", "a+t");
@@ -362,43 +423,37 @@ void update_inven(Inven *data){
 	}
 	fclose(fip);
 }
-//-------------------------------------------------------------------------------------------
-void main_staff(){
-	FILE *fsp;	//staff.txt
-	int staff_option;
-	print_staff_menu();
-	if ((fsp = fopen("staff.txt", "a+t")) == NULL){
-		fprintf(stderr, "입력을 위한 파일을 열 수 없습니다.");
-		exit(1);
-	}
-	scanf("%d", &staff_option);
-	getchar();
-	switch (staff_option){
-		case 1:
-			add_srecord(fsp);	
-			fclose(fsp);
-			break;
-		case 2:
-			cut_staff(fsp);
-			break;
-		case 3:
-			print_staff(fsp);
-			fclose(fsp);
-			break;
-		default:
-			break;
-	}
-	printf("\n");
+//----------------------------------------마감처리---------------------------------------
+void print_selling(Sell *sellp){
+	printf("----------판매 지표---------\n");
+	for(int i = 0;i < 6;i++)
+		printf("%8s\t : %3d잔\n", sellp[i].item, sellp[i].count);
+	printf("----------------------------\n\n");
 }
 
 
+void main_close(int *tp, Inven *inventory, Sell *sellp) {
+	
+	printf("\n<마감정산표>\n\n");
+	printf("-----------------\n");
+	printf("오늘 매출 : %d\n", *tp);
+	printf("-----------------\n");
+
+	print_selling(sellp);
+	print_inven(inventory);
+	
+}
+	
+//---------------------------------------main 함수-----------------------------------------
 int main(){
 	int m;
-	Inven *inventory;//
 	int today_total = 0;
-	int *totalp;
-	totalp = &today_total;
-	
+	int *totalp = &today_total;
+	//판매지수 관리
+	Sell *sellp;
+	sellp = (Sell*)malloc(sizeof(Sell) * 6);
+	//-------------
+	Inven *inventory;//
 	inventory = (Inven *)malloc(sizeof(Inven) * INVEN_SIZE);//
 	Inven *invenp = inventory;	//
 	get_inven(inventory);
@@ -408,7 +463,7 @@ int main(){
 		scanf("%d", &m);
 		getchar();
 		if (m == 1){
-			main_open(totalp, invenp);//inventory -> invenp
+			main_open(totalp, invenp, sellp);//inventory -> invenp
 		}
 		else if (m == 2){
 			main_membership();
@@ -420,15 +475,12 @@ int main(){
 			main_staff();
 		}
 		else {
-			printf("<마감처리>\n");
-			printf("-----------------\n");
-			printf("오늘 매출 : %d\n", today_total);
-			printf("-----------------\n");
-			print_inven(inventory);
+			main_close(totalp, inventory, sellp);
 			update_inven(inventory);
 			break;
 		}
 	}
+	free(sellp);
 	free(inventory);
 	return 0;
 }
