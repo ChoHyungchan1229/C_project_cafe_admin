@@ -18,20 +18,20 @@
 
  $ git clone https://github.com/ChoHyungchan1229/C_project_cafe_admin.git
 
-
 ### Makefile 실행 설명
 -----------------------
 * 실행파일 이름 : cafe_main.c
-  * gcc 컴파일러 사용경우
+  * gcc 컴파일러 사용
   
-    $ make
-    $ ./cafe.out
+    $ make  
   
+    $ ./cafe.out  
+
   * 다른 경우
+    $ vi Makefile  
   
-    $ vi Makefile
-    CC->'원하는 컴파일러'
-  
+    CC->'원하는 컴파일러  
+
 ### Project 기능 소개
 ----------------------
 #### 1. 음료판매
