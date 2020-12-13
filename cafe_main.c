@@ -230,7 +230,6 @@ void check_sell(Sell *sellp, char *menu, int(*func)(Sell *sellp, char *)){
 	if (0> idx|| idx>5)
 		printf("\n없는 메뉴입니다.\n");
 	else
-		printf("%d check\n", idx);
 		sellp[idx].count += 1;
 }
 //------------------------------------------
